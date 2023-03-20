@@ -1,5 +1,5 @@
 import Post from "../models/Posts.js";
-
+import { uploadImage } from "../libs/cloudinary.js";
 export const getPosts = async (req, res) => {
   const posts = await Post.find();
   res.json(posts);
@@ -16,13 +16,17 @@ export const getPost = async (req, res) => {
   } catch (error) {
     res.status(500).json({
       message: "Ocurrio un error",
-      info: error.message,
+      info: error,
     });
   }
 };
 
 export const createPost = async (req, res) => {
   const { title, description } = req.body;
+
+  if (req.files.image) {
+    const response = await uploadImage(req.files.image.tempFilePath);
+  }
 
   if (!title || !description) {
     res.json({
