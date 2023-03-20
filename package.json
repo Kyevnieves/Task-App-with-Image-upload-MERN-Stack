@@ -1,0 +1,32 @@
+{
+  "name": "task-app-with-image-upload-mern-stack",
+  "version": "1.0.0",
+  "description": "Task app with image upload stack mern by Keyver Nieves",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "nodemon server/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Kyevnieves/Task-App-with-Image-upload-MERN-Stack.git"
+  },
+  "author": "Keyver Nieves",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Kyevnieves/Task-App-with-Image-upload-MERN-Stack/issues"
+  },
+  "homepage": "https://github.com/Kyevnieves/Task-App-with-Image-upload-MERN-Stack#readme",
+  "dependencies": {
+    "body-parser": "^1.20.2",
+    "cloudinary": "^1.35.0",
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2",
+    "express-fileupload": "^1.4.0",
+    "fs-extra": "^11.1.0",
+    "http-errors": "^2.0.0",
+    "mongoose": "^7.0.2",
+    "morgan": "^1.10.0",
+    "nodemon": "^2.0.21"
+  }
+}
