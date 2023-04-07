@@ -1,5 +1,6 @@
 import Post from "../models/Posts.js";
-import { uploadImage } from "../libs/cloudinary.js";
+import { uploadImage, deleteImage, convert } from "../libs/cloudinary.js";
+import fs from "fs-extra";
 export const getPosts = async (req, res) => {
   const posts = await Post.find();
   res.json(posts);
@@ -23,9 +24,16 @@ export const getPost = async (req, res) => {
 
 export const createPost = async (req, res) => {
   const { title, description } = req.body;
+  let image;
+  if (req.files?.image) {
+    const response = await convert(req.files.image.tempFilePath);
+    image = {
+      url: response.secure_url,
+      public_id: response.public_id,
+    };
 
-  if (req.files.image) {
-    const response = await uploadImage(req.files.image.tempFilePath);
+    await fs.remove(req.files.image.tempFilePath);
+    await fs.remove("server/converted/imageConverted.avif");
   }
 
   if (!title || !description) {
@@ -36,14 +44,42 @@ export const createPost = async (req, res) => {
     return;
   }
 
-  const newPost = new Post({ title, description });
+  const newPost = new Post({ title, description, image });
   await newPost.save();
   return res.json(newPost);
 };
 
 export const updatePost = async (req, res) => {
   const { id } = req.params;
-  const updatedPost = await Post.findByIdAndUpdate(id, req.body, { new: true });
+  const post = await Post.findById(id);
+  if (post.image.public_id) {
+    const idImage = post.image.public_id;
+    await deleteImage(idImage);
+  }
+
+  let image;
+
+  if (req.files?.image) {
+    const response = await convert(req.files.image.tempFilePath);
+
+    image = {
+      url: response.secure_url,
+      public_id: response.public_id,
+    };
+
+    await fs.remove(req.files.image.tempFilePath);
+    await fs.remove("server/converted/imageConverted.avif");
+  }
+
+  const newValues = {
+    title: req.body.title,
+    description: req.body.description,
+    image,
+  };
+
+  const updatedPost = await Post.findByIdAndUpdate(id, newValues, {
+    new: true,
+  });
 
   try {
     !updatedPost
@@ -63,6 +99,11 @@ export const updatePost = async (req, res) => {
 export const deletePost = async (req, res) => {
   const { id } = req.params;
   const deletedPost = await Post.findByIdAndDelete(id);
+
+  if (deletedPost.image.public_id) {
+    const idImage = deletedPost.image.public_id;
+    await deleteImage(idImage);
+  }
 
   !deletedPost
     ? res.status(404).send("Post no encontrado.")
